@@ -1,0 +1,9 @@
+evidently
+fastapi
+scikit-learn
+catboost
+numpy
+uvicorn
+pydantic
+mlflow
+catboost
