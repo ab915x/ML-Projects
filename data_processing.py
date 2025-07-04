@@ -2,8 +2,6 @@ import pandas as pd
 import numpy as np
 
 
-# Это файл извлечения фичей 
-
 def extract_features_for_training(data: list) -> pd.DataFrame:
     train_data = pd.DataFrame(
         {
