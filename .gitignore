@@ -4,3 +4,4 @@ mlruns
 catboost_info
 *.csv
 reports
+*.ipynb
