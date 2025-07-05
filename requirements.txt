@@ -1,9 +1,10 @@
-evidently
 fastapi
-scikit-learn
-catboost
-numpy
 uvicorn
-pydantic
 mlflow
 catboost
+pandas
+evidently
+scikit-learn
+requests
+pydantic
+numpy
