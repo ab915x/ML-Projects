@@ -11,7 +11,9 @@ class PredictRequest(BaseModel):
 class PredictResponse(BaseModel):
     prediction: list[float]
 
-model_path = os.getenv("MODEL_PATH", "pipeline.joblib")
+model_path = model = "models:/anton-belousov-fyb5457-mlops-project-model@prod"
+
+model = mlflow.pyfunc.load_model(model_path)
 
 app = FastAPI()
 

@@ -48,5 +48,4 @@ def train_model(train_data: pd.DataFrame):
             model_info = mlflow.catboost.log_model(model, "model", registered_model_name=model_name)
         latest_version = client.search_model_versions(f"name='{model_name}'")[0].version
         client.set_registered_model_alias(model_name, "prod", latest_version)
-    return True
 

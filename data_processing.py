@@ -15,7 +15,7 @@ def extract_features_for_training(data: list) -> pd.DataFrame:
     "target": data["Times"]
     }
     )
-    train_data.to_csv("reference_data.csv")
+    train_data.to_csv("reference_data.csv", index=False)
     return train_data
 
 def extract_features_for_inference(data: list) -> pd.DataFrame:
