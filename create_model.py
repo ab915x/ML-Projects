@@ -1,4 +1,4 @@
-from catboost import CatBoostRegressor, Pool
+from catboost import CatBoostClassifier, Pool
 from sklearn.model_selection import train_test_split
 import pandas as pd
 import mlflow
@@ -12,25 +12,25 @@ def train_model(train_data: pd.DataFrame):
     train_pool = Pool(X_train, y_train)
     eval_pool = Pool(X_val, y_val)
     with mlflow.start_run():
-        model = CatBoostRegressor(
-            eval_metric="RMSE",
+        model = CatBoostClassifier(
+            eval_metric="AUC",
             early_stopping_rounds=50
 
             )
         model.fit(train_pool, eval_set=eval_pool)
 
-        best_metric = model.best_score_['validation']['RMSE']
-        mlflow.log_metric("best_rmse", best_metric)
+        best_metric = model.best_score_['validation']['AUC']
+        mlflow.log_metric("Best AUC", best_metric)
 
-        eval_history = model.evals_result_['validation']['RMSE']
+        eval_history = model.evals_result_['validation']['AUC']
         for i, metric_value in enumerate(eval_history):
-            mlflow.log_metric("rmse", metric_value, step=i)
+            mlflow.log_metric("AUC", metric_value, step=i)
 
-        final_train_metric = model.evals_result_['learn']['RMSE'][-1]
+        final_train_metric = model.evals_result_['learn']['AUC'][-1]
         final_val_metric = eval_history[-1]
         mlflow.log_metrics({
-            "final_train_rmse": final_train_metric,
-            "final_val_rmse": final_val_metric
+            "final_train_auc": final_train_metric,
+            "final_val_auc": final_val_metric
         })
 
         mlflow.log_params(model.get_params())

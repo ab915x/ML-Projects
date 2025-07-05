@@ -42,7 +42,16 @@ def predict(request: PredictRequest, model=Depends(get_model)) -> PredictRespons
 
 @app.post("/trigger_retrain")
 def retrain_model(url: str):
-
+    data = pd.read_csv(download_data)
+    data_quality_flag = True
+    features = extract_features_for_training(data)
+    if os.path.exists('reference_data.csv'):
+        data_quality_flag = test_and_report_inference_data(features)
+        
+    if data_quality_flag:
+        new_model = train_model(features)
+    else:
+        pass
 
 
 def main():

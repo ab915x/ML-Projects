@@ -19,7 +19,7 @@ def extract_features_for_training(data: list) -> pd.DataFrame:
     return train_data
 
 def extract_features_for_inference(data: list) -> pd.DataFrame:
-    inference_data = {
+    inference_data = pd.DataFrame({
     "length": [len(password) for password in data],
     "num_uppercase": [sum(1 for c in password if c.isupper()) for password in data],
     "num_lowercase": [sum(1 for c in password if c.islower()) for password in data],
@@ -28,5 +28,6 @@ def extract_features_for_inference(data: list) -> pd.DataFrame:
     "unique_chars": [len(set(password)) for password in data],
     "entropy": [len(password) * np.log2(len(set(password))) if password else 0 for password in data]
     }
-    return pd.DataFrame(inference_data)
+    )
+    return inference_data
 

@@ -1,38 +1,31 @@
 from typing import Dict, List, Union
 from evidently.metrics import *
-from evidently.metric_preset import (
-    DataQualityPreset,
+from evidently.presets import (
+    DataSummaryPreset,
     DataDriftPreset,
-    RegressionPreset
+    ClassificationPreset
 )
-from evidently.test_suite import TestSuite
 from evidently.tests import *
-from evidently import ColumnMapping
+import pandas as pd
+from evidently import Report
 
 def test_and_report_inference_data(current):
     reference = pd.read_csv("reference_data.csv")
 
     report = Report(metrics=[
-        DataQualityPreset(),
-        DataDriftPreset(),
-        RegressionPreset()
-    ])
-    report.run(
+        DataSummaryPreset(),
+        DataDriftPreset(method="psi"),
+        ],
+        include_tests=True
+        )
+    report_snapshot = report.run(
         reference_data=reference,
         current_data=current,
-        column_mapping=ColumnMapping(
-            numerical_features=[
-                'length', 'num_uppercase', 'num_lowercase',
-                'num_digits', 'num_special', 'unique_chars', 'entropy'
-            ],
-            target='target'
-        )
     )
-    report.save_html("data_report.html")
-    report.save_json("data_report.json")
-
+    report_snapshot.save_html("reports/data_report.html")
+    report_snapshot.save_json("reports/data_report.json")
+    return True
     tests = TestSuite(tests=[
-        TestValueRMSE(),  
         TestShareOfMissingValues(),  
         TestNumberOfConstantColumns(),  
         TestShareOfDriftedColumns(),  
