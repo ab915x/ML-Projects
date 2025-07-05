@@ -26,15 +26,11 @@ class PredictRequest(BaseModel):
 class PredictResponse(BaseModel):
     predictions: List[float]
 
-class TriggerRequest(BaseModel):
-    data_url: str
-
 app = FastAPI()
 
 model_ = None
 is_training = False
 training_lock = threading.Lock()
-global last_trained 
 last_trained = None
 
 
@@ -67,31 +63,46 @@ def predict(request: PredictRequest):
 
 @app.post("/trigger_retrain")
 def retrain_model(url: str):
-    global is_training
+    global is_training, last_trained  # Added last_trained here
 
-    if is_training:
+    with training_lock:
+        if is_training:
+            return {
+                "status": "rejected",
+                "message": "Training already in progress",
+                "success": False
+            }
+        is_training = True
+    
+    try:
+        data_path = download_data(url)
+        data = pd.read_csv(data_path)
+        data_quality_flag = True
+        features = extract_features_for_training(data)
+        if os.path.exists('reference_data.csv'):
+            data_quality_flag = test_and_report_inference_data(features)
+        
+        if data_quality_flag:
+            train_model(features)
+            get_model()
+            last_trained = pd.Timestamp.now().isoformat()
+            
         return {
-            "status": "rejected",
-            "message": "Training already in progress",
+            "status": "completed" if data_quality_flag else "skipped",
+            "message": "Training completed" if data_quality_flag else "Data quality check failed",
+            "success": data_quality_flag
+        }
+        
+    except Exception as e:
+        logger.error(f"Training failed: {str(e)}")
+        return {
+            "status": "failed",
+            "message": str(e),
             "success": False
         }
-
-    is_training = True
-    
-    data_path = download_data(url)
-    data = pd.read_csv(data_path)
-    data_quality_flag = True
-    features = extract_features_for_training(data)
-    if os.path.exists('reference_data.csv'):
-        data_quality_flag = test_and_report_inference_data(features)
         
-    if data_quality_flag:
-        train_model(features)
-        get_model()
-        last_trained = pd.Timestamp.now().isoformat()
+    finally:
         is_training = False
-    else:
-        pass
 
 @app.get("/status")
 def get_status():
