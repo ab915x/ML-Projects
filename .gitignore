@@ -5,3 +5,4 @@ catboost_info
 *.csv
 reports
 *.ipynb
+.ruff_cache

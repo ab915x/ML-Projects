@@ -1,7 +1,7 @@
 import os
 from fastapi import HTTPException
 import requests
-import logging
+
 
 def download_data(url: str):
     try:
@@ -17,7 +17,7 @@ def download_data(url: str):
             f.write(response.content)
 
         return file_path
-    
+
     except requests.exceptions.RequestException as e:
         raise HTTPException(status_code=400, detail=f"Data download failed: {e}")
     except OSError as e:
