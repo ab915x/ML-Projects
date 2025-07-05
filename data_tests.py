@@ -5,9 +5,11 @@ from evidently.presets import (
     DataDriftPreset,
     ClassificationPreset
 )
-from evidently.tests import *
 import pandas as pd
 from evidently import Report
+from evidently.legacy.test_suite import TestSuite
+from evidently.legacy.tests import TestShareOfMissingValues, TestNumberOfConstantColumns, TestNumberOfEmptyRows, TestNumberOfEmptyColumns, TestNumberOfDuplicatedColumns, TestShareOfDriftedColumns, TestNumberOfOutRangeValues, TestColumnValueMean
+import json
 
 def test_and_report_inference_data(current):
     reference = pd.read_csv("reference_data.csv")
@@ -23,29 +25,12 @@ def test_and_report_inference_data(current):
         current_data=current,
     )
     report_snapshot.save_html("reports/data_report.html")
-    report_snapshot.save_json("reports/data_report.json")
-    return True
-    tests = TestSuite(tests=[
-        TestShareOfMissingValues(),  
-        TestNumberOfConstantColumns(),  
-        TestShareOfDriftedColumns(),  
-        TestNumberOfOutRangeValues()  
-    ])
-    
-    tests.run(
-        reference_data=reference,
-        current_data=current,
-        column_mapping=ColumnMapping(
-            numerical_features=[
-                'length', 'num_uppercase', 'num_lowercase',
-                'num_digits', 'num_special', 'unique_chars', 'entropy'
-            ]
-        )
-    )
-    
-    tests.save_html("tests.html")
-    tests.save_json("tests.json")
-    if tests.as_dict()["summary"]["failed_tests"] == 0:    
+    with open("reports/data_report.json", "w") as f:
+        json.dump(report_snapshot.json(), f)
+
+    report_dict = json.loads(report_snapshot.json())
+    status = all([test['status'] == 'SUCCESS' for test in report_dict['tests']])
+    if status:  
         print("Data test passed successfully, retraining will be executed")
         return True   
     print("Invalid data detected, no retraining will be executed")
