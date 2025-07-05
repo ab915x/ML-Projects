@@ -10,21 +10,32 @@ from data_tests import test_and_report_inference_data
 from utils import download_data
 import pandas as pd
 import logging
-
+import threading
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
+MODEL_NAME = "anton-belousov-mlops-project-model"
+MODEL_ALIAS = "prod"
+MODEL_PATH = f"models:/{MODEL_NAME}@{MODEL_ALIAS}"
+
 class PredictRequest(BaseModel):
     passwords: List[str]
 
 class PredictResponse(BaseModel):
-    predictions: List[float]  
+    predictions: List[float]
 
-MODEL_PATH = "models:/anton-belousov-fyb5457-mlops-project-model@prod"
+class TriggerRequest(BaseModel):
+    data_url: str
+
 app = FastAPI()
+
 model_ = None
+is_training = False
+training_lock = threading.Lock()
+global last_trained 
+last_trained = None
 
 
 def get_model():
@@ -56,6 +67,17 @@ def predict(request: PredictRequest):
 
 @app.post("/trigger_retrain")
 def retrain_model(url: str):
+    global is_training
+
+    if is_training:
+        return {
+            "status": "rejected",
+            "message": "Training already in progress",
+            "success": False
+        }
+
+    is_training = True
+    
     data_path = download_data(url)
     data = pd.read_csv(data_path)
     data_quality_flag = True
@@ -66,8 +88,18 @@ def retrain_model(url: str):
     if data_quality_flag:
         train_model(features)
         get_model()
+        last_trained = pd.Timestamp.now().isoformat()
+        is_training = False
     else:
         pass
+
+@app.get("/status")
+def get_status():
+    return {
+        "model_loaded": model_ is not None,
+        "is_training": is_training,
+        "last_trained": last_trained
+    }
 
 
 def main():
