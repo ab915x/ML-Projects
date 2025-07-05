@@ -1,17 +1,23 @@
 from fastapi import Body, Depends, FastAPI
 import uvicorn
 from pydantic import BaseModel
-from typing import Annotated
+from typing import Annotated, List
 import joblib
+import requests
 import os
 
+from create_model import train_model
+from data_processing import extract_features_for_training, extract_features_for_inference
+from data_tests import test_and_report_inference_data
+from utils import download_data
+
 class PredictRequest(BaseModel):
-    passwords: list[str]
+    passwords: List[str]
 
 class PredictResponse(BaseModel):
-    prediction: list[float]
+    prediction: List[float]
 
-model_path = model = "models:/anton-belousov-fyb5457-mlops-project-model@prod"
+model_path = "models:/anton-belousov-fyb5457-mlops-project-model@prod"
 
 model = mlflow.pyfunc.load_model(model_path)
 
@@ -34,6 +40,8 @@ def predict(request: PredictRequest, model=Depends(get_model)) -> PredictRespons
     prediction = model.predict(request.passwords)  
     return PredictResponse(prediction=prediction.tolist()) 
 
+@app.post("/trigger_retrain")
+def retrain_model(url: str):
 
 
 
