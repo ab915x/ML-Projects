@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Body
 import uvicorn
 from pydantic import BaseModel
 from typing import List
@@ -65,7 +65,7 @@ def predict(request: PredictRequest):
 
 
 @app.post("/trigger_retrain")
-def retrain_model(request: RetrainRequest):
+def retrain_model(request: RetrainRequest = Body(...)): 
     global is_training, last_trained
 
     with training_lock:
@@ -123,3 +123,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
