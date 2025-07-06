@@ -14,6 +14,7 @@ from utils import download_data
 import pandas as pd
 import logging
 import threading
+from datetime import datetime
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

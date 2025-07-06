@@ -1,8 +1,8 @@
 from catboost import CatBoostClassifier, Pool
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import roc_auc_score
 import pandas as pd
 import mlflow
-# Это файл для обучения модели и сохранения ее в корне
 
 MODEL_NAME = "anton-belousov-mlops-project-model"
 
@@ -16,8 +16,9 @@ def train_model(train_data: pd.DataFrame):
     eval_pool = Pool(X_val, y_val)
     with mlflow.start_run():
         model = CatBoostClassifier(eval_metric="AUC", early_stopping_rounds=50)
-        model.fit(train_pool, eval_set=eval_pool)
-
+        
+        model.fit(train_pool, eval_set=eval_pool, verbose=True, plot=False)
+        
         best_metric = model.best_score_["validation"]["AUC"]
         mlflow.log_metric("Best AUC", best_metric)
 
@@ -25,7 +26,12 @@ def train_model(train_data: pd.DataFrame):
         for i, metric_value in enumerate(eval_history):
             mlflow.log_metric("AUC", metric_value, step=i)
 
-        final_train_metric = model.evals_result_["learn"]["AUC"][-1]
+        if "learn" in model.evals_result_ and "AUC" in model.evals_result_["learn"]:
+            final_train_metric = model.evals_result_["learn"]["AUC"][-1]
+        else:
+            train_pred = model.predict_proba(X_train)[:, 1]
+            final_train_metric = roc_auc_score(y_train, train_pred)
+            
         final_val_metric = eval_history[-1]
         mlflow.log_metrics(
             {"final_train_auc": final_train_metric, "final_val_auc": final_val_metric}
