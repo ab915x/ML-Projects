@@ -5,7 +5,7 @@ import json
 
 
 def test_and_report_inference_data(current):
-    reference = pd.read_csv("reference_data.csv")
+    reference = pd.read_csv("app/reference_data.csv")
 
     report = Report(
         metrics=[
@@ -18,8 +18,8 @@ def test_and_report_inference_data(current):
         reference_data=reference,
         current_data=current,
     )
-    report_snapshot.save_html("reports/data_report.html")
-    with open("reports/data_report.json", "w") as f:
+    report_snapshot.save_html("app/reports/data_report.html")
+    with open("app/reports/data_report.json", "w") as f:
         json.dump(report_snapshot.json(), f)
 
     report_dict = json.loads(report_snapshot.json())

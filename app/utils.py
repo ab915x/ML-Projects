@@ -8,7 +8,7 @@ def download_data(url: str):
         response = requests.get(url, timeout=30)
         response.raise_for_status()
 
-        file_path = "new_data.csv"
+        file_path = "app/new_data.csv"
 
         if os.path.exists(file_path):
             os.remove(file_path)

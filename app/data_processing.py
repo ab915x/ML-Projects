@@ -27,7 +27,7 @@ def extract_features_for_training(data: list) -> pd.DataFrame:
             "target": data["Times"],
         }
     )
-    train_data.to_csv("reference_data.csv", index=False)
+    train_data.to_csv("app/reference_data.csv", index=False)
     return train_data
 
 
