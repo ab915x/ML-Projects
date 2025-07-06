@@ -1,17 +1,17 @@
-from python:3.13.5-bullseye
+FROM python:3.13.5-bullseye
 
 WORKDIR /app
 
-COPY app.py . 
-COPY create_model.py .
-COPY data_tests.py .
-COPY data_processing.py .
-COPY utils.py .
+COPY app/app.py . 
+COPY app/create_model.py .
+COPY app/data_tests.py .
+COPY app/data_processing.py .
+COPY app/utils.py .
 COPY requirements.txt .
 
 RUN python -m venv .venv .
 
-RUN source .venv/bin/activate
+RUN . .venv/bin/activate
 
 RUN pip install -r requirements.txt
 

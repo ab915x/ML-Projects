@@ -31,6 +31,9 @@ class PredictRequest(BaseModel):
 class PredictResponse(BaseModel):
     predictions: List[float]
 
+class RetrainRequest(BaseModel):
+    data_url: str 
+
 
 app = FastAPI()
 
@@ -62,8 +65,8 @@ def predict(request: PredictRequest):
 
 
 @app.post("/trigger_retrain")
-def retrain_model(url: str):
-    global is_training, last_trained  # Added last_trained here
+def retrain_model(request: RetrainRequest):
+    global is_training, last_trained
 
     with training_lock:
         if is_training:
@@ -75,7 +78,7 @@ def retrain_model(url: str):
         is_training = True
 
     try:
-        data_path = download_data(url)
+        data_path = download_data(str(request.data_url))  
         data = pd.read_csv(data_path)
         data_quality_flag = True
         features = extract_features_for_training(data)
@@ -85,23 +88,25 @@ def retrain_model(url: str):
         if data_quality_flag:
             train_model(features)
             get_model()
-            last_trained = pd.Timestamp.now().isoformat()
+            last_trained = datetime.now().isoformat()
 
         return {
             "status": "completed" if data_quality_flag else "skipped",
-            "message": "Training completed"
-            if data_quality_flag
-            else "Data quality check failed",
+            "message": "Training completed" if data_quality_flag else "Data quality check failed",
             "success": data_quality_flag,
+            "last_trained": last_trained if data_quality_flag else None
         }
 
     except Exception as e:
-        logger.error(f"Training failed: {str(e)}")
-        return {"status": "failed", "message": str(e), "success": False}
+        logger.error(f"Training failed: {str(e)}", exc_info=True)
+        return {
+            "status": "failed",
+            "message": f"Training failed: {str(e)}",
+            "success": False
+        }
 
     finally:
         is_training = False
-
 
 @app.get("/status")
 def get_status():
