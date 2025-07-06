@@ -9,6 +9,8 @@ COPY app/data_processing.py .
 COPY app/utils.py .
 COPY requirements.txt .
 
+RUN mkdir -p /app/data /app/reports
+
 RUN python -m venv .venv .
 
 RUN . .venv/bin/activate
