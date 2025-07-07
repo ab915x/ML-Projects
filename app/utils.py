@@ -8,8 +8,9 @@ def download_data(url: str):
         response = requests.get(url, timeout=30)
         response.raise_for_status()
 
-        file_dir = "/app/data"
-        file_path = os.path.join(file_dir, "new_data.csv")
+        file_path = "data/new_data.csv"
+        
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
 
         if os.path.exists(file_path):
             os.remove(file_path)

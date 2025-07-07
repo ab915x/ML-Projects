@@ -83,7 +83,7 @@ def retrain_model(request: RetrainRequest = Body(...)):
         data = pd.read_csv(data_path)
         data_quality_flag = True
         features = extract_features_for_training(data)
-        if os.path.exists("reference_data.csv"):
+        if os.path.exists("/app/data/reference_data.csv"):
             data_quality_flag = test_and_report_inference_data(features)
 
         if data_quality_flag:

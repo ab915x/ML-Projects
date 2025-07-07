@@ -5,8 +5,8 @@ import json
 import os
 
 def test_and_report_inference_data(current):
-    reference_path = "/app/data/reference_data.csv"
-    report_dir = "/app/reports"
+    reference_path = "data/reference_data.csv"
+    report_dir = "reports"
     
     os.makedirs(report_dir, exist_ok=True)
     
