@@ -3,7 +3,7 @@ FROM python:3.13.5-bullseye
 WORKDIR /app
 
 RUN mkdir -p data reports && \
-    chmod -R 775 data reports
+    chmod -R 750 data reports
 
 COPY requirements.txt .
 

@@ -9,7 +9,7 @@ def download_data(url: str):
         response.raise_for_status()
 
         file_path = "data/new_data.csv"
-        
+
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
 
         if os.path.exists(file_path):

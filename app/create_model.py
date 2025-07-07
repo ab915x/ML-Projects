@@ -16,9 +16,9 @@ def train_model(train_data: pd.DataFrame):
     eval_pool = Pool(X_val, y_val)
     with mlflow.start_run():
         model = CatBoostClassifier(eval_metric="AUC", early_stopping_rounds=50)
-        
+
         model.fit(train_pool, eval_set=eval_pool, verbose=True, plot=False)
-        
+
         best_metric = model.best_score_["validation"]["AUC"]
         mlflow.log_metric("Best AUC", best_metric)
 
@@ -31,7 +31,7 @@ def train_model(train_data: pd.DataFrame):
         else:
             train_pred = model.predict_proba(X_train)[:, 1]
             final_train_metric = roc_auc_score(y_train, train_pred)
-            
+
         final_val_metric = eval_history[-1]
         mlflow.log_metrics(
             {"final_train_auc": final_train_metric, "final_val_auc": final_val_metric}
